@@ -1,12 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-
+  <meta charset="UTF-8">
+  <meta name=" viewport" content="width=device-width initial-scale=1.0 minimum-scale=1.0 miximum=1.0 user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>exif demo</title>
+  <style>
+    body {
+      font-size: 12px;
+    }
+  </style>
 </head>
-<body>
-    <h1>小鱼是逗比吗<small>这还要说吗？</small></h1>
 
+<body>
+  <h5>提示：点击图片获取图片信息</h5>
+  <img src="img/IMG_4052.JPG" id="img" alt="" width="100%" style="max-width: 500px;">
+  <div id="imgInfo1"></div>
+  <h5>提示：选择图片并显示图片信息</h5>
+  <input type="file" name="" id="fileInput">
+  <div id="imgInfo2"></div>
+  <script src="./js/exif.js"></script>
+  <script>
+    // 点击第一张图片，获取图片信息
+    document.getElementById('img').onclick = function () {
+      EXIF.getData(this, function () {
+        console.log(EXIF.getAllTags(this))
+        var info = setData(EXIF.getAllTags(this));
+        var htmlStr = ''
+        info.forEach(function (item) {
+          htmlStr += '<p>' + item.name + '：' + item.value + '</p>'
+        })
+        document.getElementById('imgInfo1').innerHTML = htmlStr;
+      })
+    }
+
+    document.getElementById('fileInput').onchange = function (e) {
+      EXIF.getData(e.target.files[0], function () {
+        console.log(EXIF.getAllTags(this))
+        var info = setData(EXIF.getAllTags(this));
+        var htmlStr = ''
+        info.forEach(function (item) {
+          htmlStr += '<p>' + item.name + '：' + item.value + '</p>'
+        })
+        document.getElementById('imgInfo2').innerHTML = htmlStr;
+      })
+    }
+
+    function setData (exifInfo) {
+      if (exifInfo.hasOwnProperty('GPSLongitude')) {
+        var lon = exifInfo.GPSLongitude[0] + exifInfo.GPSLongitude[1]/60 + exifInfo.GPSLongitude[2]/3600;
+      }
+      if (exifInfo.hasOwnProperty('GPSLatitude')) {
+        var lat = exifInfo.GPSLatitude[0] + exifInfo.GPSLatitude[1]/60 + exifInfo.GPSLatitude[2]/3600;
+      }
+      var orientationInfo = ''
+      switch(exifInfo.Orientation) {
+        case 1:
+          orientationInfo = '无旋转';
+          break;
+        case 3:
+          orientationInfo = '旋转180°';
+          break;
+        case 6:
+          orientationInfo = '顺时针90°';
+          break;
+        case 8:
+          orientationInfo = '逆时针90°';
+          break;
+        default:
+          orientationInfo = '未知';
+          break;
+
+      }
+      var arr = [
+        {
+          'name': '生产者',
+          'value': exifInfo.Make
+        },
+        {
+          'name': '型号',
+          'value': exifInfo.Model
+        },
+        {
+          'name': '创建时间',
+          'value': exifInfo.DateTimeOriginal
+        },
+        {
+          'name': '拍摄方向',
+          'value': orientationInfo
+        },
+        {
+          'name': '场景拍摄类型',
+          'value': exifInfo.SceneCaptureType
+        },
+        {
+          'name': '经度',
+          'value': lon || '未知'
+        },
+        {
+          'name': '纬度',
+          'value': lat || '未知'
+        }
+      ]
+      return arr;
+    }
+  </script>
 </body>
+
 </html>

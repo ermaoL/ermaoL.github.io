@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name=" viewport" content="width=device-width initial-scale=1.0 minimum-scale=1.0 miximum=1.0 user-scalable=no"/>
+  <meta name=" viewport" content="width=device-width initial-scale=1.0 minimum-scale=1.0 miximum=1.0 user-scalable=no" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>exif demo</title>
   <style>
@@ -36,26 +36,40 @@
     }
 
     document.getElementById('fileInput').onchange = function (e) {
-      EXIF.getData(e.target.files[0], function () {
-        console.log(EXIF.getAllTags(this))
-        var info = setData(EXIF.getAllTags(this));
-        var htmlStr = ''
-        info.forEach(function (item) {
-          htmlStr += '<p>' + item.name + '：' + item.value + '</p>'
+      var file = e.target.files[0];
+      //创建读取文件的对象  
+      var reader = new FileReader();
+      //创建文件读取相关的变量  
+      var imgFile;
+      //为文件读取成功设置事件  
+      reader.onload = function (e) {
+        alert('文件读取完成');
+        imgFile = e.target.result;
+        document.getElementById('img').setAttribute('src', imgFile)
+        EXIF.getData(file, function () {
+          console.log(EXIF.getAllTags(this))
+          var info = setData(EXIF.getAllTags(this));
+          var htmlStr = ''
+          info.forEach(function (item) {
+            htmlStr += '<p>' + item.name + '：' + item.value + '</p>'
+          })
+          document.getElementById('imgInfo2').innerHTML = htmlStr;
         })
-        document.getElementById('imgInfo2').innerHTML = htmlStr;
-      })
+      };
+
+      //正式读取文件  
+      reader.readAsDataURL(file);
     }
 
-    function setData (exifInfo) {
+    function setData(exifInfo) {
       if (exifInfo.hasOwnProperty('GPSLongitude')) {
-        var lon = exifInfo.GPSLongitude[0] + exifInfo.GPSLongitude[1]/60 + exifInfo.GPSLongitude[2]/3600;
+        var lon = exifInfo.GPSLongitude[0] + exifInfo.GPSLongitude[1] / 60 + exifInfo.GPSLongitude[2] / 3600;
       }
       if (exifInfo.hasOwnProperty('GPSLatitude')) {
-        var lat = exifInfo.GPSLatitude[0] + exifInfo.GPSLatitude[1]/60 + exifInfo.GPSLatitude[2]/3600;
+        var lat = exifInfo.GPSLatitude[0] + exifInfo.GPSLatitude[1] / 60 + exifInfo.GPSLatitude[2] / 3600;
       }
       var orientationInfo = ''
-      switch(exifInfo.Orientation) {
+      switch (exifInfo.Orientation) {
         case 1:
           orientationInfo = '无旋转';
           break;
@@ -73,8 +87,7 @@
           break;
 
       }
-      var arr = [
-        {
+      var arr = [{
           'name': '生产者',
           'value': exifInfo.Make
         },
